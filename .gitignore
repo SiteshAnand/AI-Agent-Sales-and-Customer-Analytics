@@ -24,3 +24,8 @@ data/uploads/
 
 # Local inspection files
 agent_inspection.txt
+# Local application data and caches
+.streamlit/cache/
+*.db
+*.sqlite
+*.sqlite3

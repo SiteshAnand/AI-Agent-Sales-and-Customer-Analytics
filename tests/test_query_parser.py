@@ -43,3 +43,10 @@ def test_unknown_question_is_not_guessed():
     result = parse_query("Tell me something interesting", COLUMNS)
 
     assert result["metric"] == "unknown"
+
+def test_parser_accepts_long_query_within_configured_limit():
+    from core.query_parser import parse_query
+    question = 'show sales ' + ('for each region and product ' * 120)
+    assert len(question) > 2000
+    result = parse_query(question, ['Sales', 'Region', 'Product'])
+    assert result['metric'] in {'sum', 'unknown', 'monthly', 'top', 'bottom', 'change', 'mean', 'count'}

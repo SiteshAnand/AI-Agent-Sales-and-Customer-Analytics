@@ -1,4 +1,4 @@
-﻿import pandas as pd
+import pandas as pd
 
 from core.rule_based_analysis import sales_decline_investigation
 

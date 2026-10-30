@@ -6,3 +6,4 @@ google-genai
 python-dotenv
 plotly
 pytest
+scikit-learn>=1.5,<2.0

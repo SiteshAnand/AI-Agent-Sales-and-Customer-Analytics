@@ -33,3 +33,23 @@ def profile_data(df: pd.DataFrame) -> dict:
             if df[col].nunique(dropna=False) <= 1
         ],
     }
+
+
+def data_quality_audit(df: pd.DataFrame) -> dict:
+    """Return row counts, column counts, and basic quality checks."""
+
+    if df is None:
+        raise ValueError("No dataset was provided.")
+
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("Input must be a pandas DataFrame.")
+
+    return {
+        "row_count": int(len(df)),
+        "column_count": int(len(df.columns)),
+        "duplicate_rows": int(df.duplicated().sum()),
+        "missing_values": {
+            str(col): int(count)
+            for col, count in df.isna().sum().items()
+        },
+    }
