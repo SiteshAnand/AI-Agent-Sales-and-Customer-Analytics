@@ -7,6 +7,7 @@ import streamlit as st
 
 from core.agent import ask_agent
 from core.data_loader import load_sales_file
+from core.presentation import format_generic_business_result
 
 
 # ---------------------------------------------------------
@@ -388,22 +389,99 @@ def create_answer(result):
         return "**Analysis could not be completed.** The response was invalid."
 
     if result.get("status") != "success":
-        return (
-            "**Analysis could not be completed.**\n\n"
-            + str(result.get("message", "An unexpected error occurred."))
-        )
+        message = str(result.get("message", "An unexpected error occurred."))
+        technical_markers = ("traceback", "exception:", " at line ", "<module>", "google.genai", "pandas.errors", "keyerror", "typeerror", "valueerror", "jsondecodeerror")
+        if any(marker in message.casefold() for marker in technical_markers) or len(message) > 280:
+            message = ("I couldn't complete that analysis because of an internal processing issue. "
+                       "Please try a more specific question. No raw technical details are shown here.")
+        return "**Analysis could not be completed.**\n\n" + message
 
     explanation = result.get("explanation", "Analysis completed.")
     result_data = result.get("result", {})
     tool_name = result.get("tool", "")
 
-        # Data quality audit: management-friendly report.
+    # Data quality audit: management-friendly report.
     if tool_name == "data_quality_audit":
         return format_data_quality_audit(result_data)
 
     # Data profile: management-friendly report.
     if tool_name == "data_profile":
         return format_data_profile(result_data)
+
+    # Product forecast: render a compact business report, not internal JSON.
+    if tool_name == "product_sales_forecast" and isinstance(result_data, dict):
+        forecast_rows = result_data.get("forecast_rows", [])
+        monthly_summary = result_data.get("monthly_summary", [])
+        lines = [
+            "### Product-wise sales forecast",
+            "",
+            f"**Products forecast:** {result_data.get('products_forecast', 0):,}  ",
+            f"**Latest historical month:** {result_data.get('last_historical_month', 'Not available')}  ",
+            f"**Sales measure:** {result_data.get('sales_column_used', 'Not available')}",
+            "",
+            "Forecasts are estimates based on historical monthly sales.",
+            "",
+            "#### Forecast by product",
+            "",
+            "| Product | Forecast month | Estimated sales | Historical months | Method |",
+            "|---|---|---:|---:|---|",
+        ]
+        for row in forecast_rows[:500]:
+            lines.append(
+                f"| {row.get('Product', '')} | {row.get('Forecast_Month', '')} "
+                f"| ₹{format_number(row.get('Forecast_Sales', 0))} "
+                f"| {row.get('Historical_Months', 0)} | {row.get('Method', '').replace('_', ' ').title()} |"
+            )
+        if len(forecast_rows) > 500:
+            lines.extend(["", f"Showing first 500 of {len(forecast_rows):,} product-month forecasts."])
+        if monthly_summary:
+            lines.extend(["", "#### Total estimated sales by month", "", "| Month | Estimated sales |", "|---|---:|"])
+            for row in monthly_summary:
+                lines.append(f"| {row.get('Forecast_Month', '')} | ₹{format_number(row.get('Total_Forecast_Sales', 0))} |")
+        insufficient = result_data.get("insufficient_history", [])
+        if insufficient:
+            lines.extend(["", f"**Not forecast:** {len(insufficient):,} product(s) had fewer than 3 months of usable history."])
+        warnings = result_data.get("warnings", [])
+        if warnings:
+            lines.extend(["", "**Important notes**"] + [f"- {warning}" for warning in warnings])
+        return "\n".join(lines)
+
+    # Deterministic customer shortlist: display business-ready Markdown,
+    # never the internal JSON payload.
+    if tool_name == "inactive_high_value_customers" and isinstance(result_data, dict):
+        return result_data.get("markdown", explanation)
+
+    # RFM should be presented as a short business summary, not a serialized
+    # dataframe containing thousands of customer records.
+    if tool_name == "rfm" and isinstance(result_data, dict):
+        metadata = result_data.get("metadata", {})
+        segments = result_data.get("segment_summary", {})
+        lines = [
+            "### Customer RFM analysis",
+            "",
+            f"- **Customers analysed:** {metadata.get('customer_count', 0):,}",
+            f"- **Valid transactions:** {metadata.get('valid_transaction_rows', 0):,}",
+            f"- **Snapshot date:** {str(metadata.get('snapshot_date', 'Not available'))[:10]}",
+            "",
+            "RFM segments are heuristic groupings, not predictions of future behaviour.",
+        ]
+        if isinstance(segments, dict) and segments.get("preview"):
+            lines.extend([
+                "",
+                "| Segment | Customers | Total historical value | Avg. days since purchase |",
+                "|---|---:|---:|---:|",
+            ])
+            for row in segments["preview"]:
+                lines.append(
+                    f"| {row.get('Segment', 'Unknown')} "
+                    f"| {row.get('Customers', 0):,} "
+                    f"| ₹{format_number(row.get('Total_Monetary', 0))} "
+                    f"| {format_number(row.get('Average_Recency', 0))} |"
+                )
+        warnings = result_data.get("warnings", [])
+        if warnings:
+            lines.extend(["", "**Notes**"] + [f"- {warning}" for warning in warnings])
+        return "\n".join(lines)
 
     # Multi-step deterministic analyses.
     if tool_name in {
@@ -498,13 +576,10 @@ def create_answer(result):
             f"Percentage change: **{change_text}**"
         )
 
-    # Fallback for other results.
-    return (
-        f"**{explanation}**\n\n"
-        "```json\n"
-        f"{json.dumps(result_data, indent=2, ensure_ascii=False, default=str)}\n"
-        "```"
-    )
+    # Universal business-friendly fallback. Never expose serialized JSON,
+    # Python representations, or internal tool payloads in the chat transcript.
+    return format_generic_business_result(explanation, result_data)
+
 
 
 # ---------------------------------------------------------

@@ -10,8 +10,8 @@ def parse_query(question: str, columns: list[str]) -> dict:
 
     question = question.strip()
 
-    if len(question) > 2000:
-        raise ValueError("Question is too long.")
+    if len(question) > 10000:
+        raise ValueError("Question is too long (maximum 10,000 characters).")
 
     text = question.lower()
 
