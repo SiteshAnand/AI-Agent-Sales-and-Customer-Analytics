@@ -37,7 +37,6 @@ The objective is to bridge the gap between business intelligence, customer analy
 - Analyse customer behaviour and purchasing patterns.
 - Perform RFM (Recency, Frequency and Monetary) segmentation.
 - Identify inactive and high-value customers.
-- Perform customer churn analysis.
 
 ### 3. Predictive Analytics
 - Sales forecasting.
