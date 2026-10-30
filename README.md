@@ -1,81 +1,277 @@
-# Business Analysis & Customer Success AI Agent
+# Sales & Customer Analytics AI Agent
 
-Local Streamlit app for analysing uploaded CSV/Excel business datasets. Python performs calculations; Gemini maps natural-language questions to approved analytics tools and explains the result.
+**An AI-powered business analytics platform for sales performance analysis, customer intelligence, predictive analytics and data-driven decision-making.**
 
-## Setup (Windows PowerShell)
+[![Production App](https://img.shields.io/badge/Streamlit-Production-brightgreen)](https://ai-agent-sales-and-customer-analytics-xxrti5gfmqxy5appjyeanyg.streamlit.app/)
+[![Testing App](https://img.shields.io/badge/Streamlit-Testing-blue)](https://ai-agent-sales-and-customer-analytics-bgc2yk7uer9endoffe54n6.streamlit.app/)
+[![Python](https://img.shields.io/badge/Python-3.x-blue)](https://www.python.org/)
+[![Framework](https://img.shields.io/badge/Framework-Streamlit-red)](https://streamlit.io/)
+[![AI](https://img.shields.io/badge/AI-Google%20Gemini-orange)](https://ai.google.dev/)
 
-1. Open this folder in VS Code.
-2. Create/activate a virtual environment if desired.
-3. Install dependencies: `python -m pip install -r requirements.txt`
-4. Copy `.env.example` to `.env` and add your Gemini API key.
-5. Start: `python -m streamlit run app.py`
-6. Tests: `python -m pytest -q`
+## 🚀 Live Applications
 
-## Configuration
+| Environment | Application |
+|---|---|
+| Production | [Launch Sales & Customer Analytics AI Agent](https://ai-agent-sales-and-customer-analytics-xxrti5gfmqxy5appjyeanyg.streamlit.app/) |
+| Testing | [Launch Testing Application](https://ai-agent-sales-and-customer-analytics-bgc2yk7uer9endoffe54n6.streamlit.app/) |
 
-`config/settings.py` loads `.env`. Do not upload `.env` or share your API key.
+## 📌 Project Overview
 
-## Current analytics tools
+The Sales & Customer Analytics AI Agent is an interactive, AI-powered analytics application designed to help business users understand sales performance, identify customer patterns, evaluate business trends and perform advanced analytical tasks using natural-language queries.
 
-Numeric summaries, distinct counts, grouped metrics/rankings, filtered metrics, monthly/quarterly/yearly totals, and percentage change when current/previous values are supplied explicitly. Unsupported questions should be reported as unsupported rather than having figures invented.
+Built using Python, Streamlit, Google Gemini and analytical libraries, the application combines traditional data analysis techniques with AI-driven query interpretation.
 
-## Ranking behaviour
+Users can upload business datasets and interact with the application through natural-language questions instead of relying entirely on manual analysis, coding or predefined reports.
 
-Clear highest/lowest salesperson sales questions are calculated locally without calling Gemini. Requested counts such as “top 3” or “five lowest” are honoured, up to the available groups. Other question types use Gemini's validated tool plan.
+The objective is to bridge the gap between business intelligence, customer analytics and AI-powered decision support.
 
-## Deterministic workflows added in the reliability update
+## 🎯 Key Capabilities
 
-- Dataset-overview questions (columns, types, nonblank counts, distinct counts, and available analysis categories) are answered locally without requiring Gemini.
-- Monthly sales comparisons by region calculate monthly totals, strongest/weakest periods, month-to-month absolute and percentage changes, and cautious management actions from the observed data.
-- These workflows are covered by regression tests, including a zero-baseline percentage-change case.
+### 1. Sales Performance Analytics
+- Analyse overall sales and revenue performance.
+- Evaluate regional and category-level performance.
+- Identify sales trends and performance changes.
+- Investigate business performance through natural-language queries.
 
-The app is designed for reliable analysis of supported question patterns, not arbitrary unrestricted reasoning. Unsupported questions should fail clearly rather than invent results. Validate any recommendations against the business context before acting on them.
+### 2. Customer Analytics & Segmentation
+- Analyse customer behaviour and purchasing patterns.
+- Perform RFM (Recency, Frequency and Monetary) segmentation.
+- Identify inactive and high-value customers.
+- Perform customer churn analysis.
 
+### 3. Predictive Analytics
+- Sales forecasting.
+- Regression analysis.
+- Churn modelling.
+- Analytical evaluation of business trends.
 
-## Customer reactivation analysis
+### 4. Market Basket Analysis
+- Analyse product purchase combinations.
+- Identify product associations and purchasing patterns.
+- Support cross-selling and product affinity analysis.
 
-Questions such as “list customers with high sales value who have not bought recently” are handled locally when customer ID, transaction date, and sales-value columns are available. The default inactivity threshold is 90 days; a threshold such as “60 days” or “3 months” in the question overrides it. The snapshot date is anchored to the latest valid transaction date in the uploaded data. The response shows up to 20 qualifying customers, ranked by historical sales value, with last purchase, days inactive, transaction count, and sales value.
+### 5. AI-Powered Business Analysis
+- Ask business questions using natural language.
+- Interpret analytical queries through AI-powered query intelligence.
+- Execute relevant analytical operations.
+- Present results in business-friendly formats.
 
-See `RELIABILITY_AUDIT.md` for the changes made and verification limits.
+### 6. Data Understanding & Validation
+- Upload business datasets.
+- Understand dataset structure and characteristics.
+- Perform data-quality checks.
+- Validate analytical results.
 
+## 🛠️ Technology Stack
 
-## Product-wise monthly sales forecasting
+| Component | Technology |
+|---|---|
+| Programming Language | Python |
+| Application Framework | Streamlit |
+| AI / LLM | Google Gemini |
+| Data Manipulation | Pandas, NumPy |
+| Machine Learning | Scikit-learn |
+| Data Visualisation | Plotly |
+| Testing | Pytest |
+| Development Environment | VS Code |
+| Version Control | Git & GitHub |
+| Deployment | Streamlit Community Cloud |
 
-The agent supports questions such as “Forecast product-wise sales for the next two months based on historical data.” It aggregates the configured sales-value field by product and calendar month, then produces a transparent baseline forecast for each eligible product. Products with fewer than three monthly observations are reported as insufficient-history cases rather than assigned fabricated forecasts.
+## 🏗️ Application Architecture
 
-Forecast method selection is history-dependent: seasonal-naive (same month in the prior year) when at least 24 monthly observations are available; damped linear trend for 6–23 months; and a trailing-three-month average for 3–5 months. Forecasts are estimates, not guarantees. Missing months within a product's observed span are treated as zero sales; negative historical values are retained and may influence the trend, while future negative predictions are floored at zero. Validate these assumptions against the business's transaction/returns policy before operational use.
+The application follows a modular architecture that separates data handling, analytical operations, AI interpretation and response presentation.
 
-## Reliability upgrade notes
+```text
+User
+  |
+  v
+Streamlit Application (app.py)
+  |
+  v
+AI Agent & Query Intelligence
+  |
+  +---------------------------+
+  |                           |
+  v                           v
+Google Gemini             Query Parser
+  |                           |
+  +-------------+-------------+
+                |
+                v
+       Analytical Tool Layer
+                |
+     +----------+----------+
+     |          |          |
+     v          v          v
+  Sales     Customer    Predictive
+ Analytics  Analytics   Analytics
+     |          |          |
+     +----------+----------+
+                |
+                v
+       Result Validation
+                |
+                v
+       Response & Presentation
+                |
+                v
+          User Output
+```
 
-This build includes deterministic total-sales and product-wise monthly forecasts (1–3 month horizons from natural-language requests), pairwise Market Basket Analysis (support, confidence, lift), and independent execution of clearly separated multi-part questions using semicolons, new lines, or phrases such as “and also”. Existing RFM, churn classification, regression, data-quality, and rule-based sales analysis modules are retained.
+### Core Analytical Modules
 
-### Market Basket input
+The project uses a modular codebase with dedicated components for:
 
-Provide one row per item within a transaction, with a transaction/order/invoice ID column and a product/item column. The model deduplicates repeated product rows within a transaction and reports pairwise association rules. This is association, not causal evidence.
+- Data loading and data quality.
+- Query parsing and query intelligence.
+- Sales and rule-based analysis.
+- Customer segmentation and RFM.
+- Churn modelling.
+- Forecasting and regression.
+- Market Basket Analysis.
+- Result validation.
+- Response generation and presentation.
 
-### Forecasting notes
+## 📊 Example Business Questions
 
-Forecasts are baseline estimates based on monthly totals. Seasonal-naive forecasts are used with at least 24 months of history; a damped trend is used with 6–23 months; a recent three-month average is used with 3–5 months. Forecasts are estimates, not guarantees. Verify that the latest month is complete and that missing months legitimately mean zero sales before interpreting results.
+Users can interact with the application using questions such as:
 
-### Tests
+- What is the overall sales performance?
+- Which regions are experiencing a decline in sales?
+- Identify inactive high-value customers.
+- Perform RFM customer segmentation.
+- Forecast future sales.
+- Analyse customer churn.
+- Which products are frequently purchased together?
+- Perform regression analysis on the uploaded dataset.
 
-Run `python -m pytest -q` from the project root. Test dependencies are listed in `requirements.txt`. Keep your real `.env` file and private source data outside shared ZIPs; `.env.example` should contain placeholders only.
+The actual analytical questions available depend on the uploaded dataset and its supported structure.
 
-## Six-layer architecture
+## ⚙️ Installation & Setup
 
-See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the full design. The current implementation separates:
+### Prerequisites
+- Python
+- Git
+- Google Gemini API key
 
-1. Query intelligence (`core/query_intelligence.py`) — bounded multi-task planning.
-2. Data understanding (`core/data_understanding.py`) — dataset profile and semantic role hints.
-3. Deterministic analytics (`core/analytics.py`, `core/tools.py`, `core/rule_based_analysis.py`).
-4. Modeling (`core/forecasting.py`, `core/rfm.py`, `core/churn_model.py`, `core/market_basket.py`, `core/regression.py`).
-5. Validation (`core/result_validation.py` plus tool-specific checks).
-6. Streamlit experience (`app.py`) — existing upload and response interface retained.
+### 1. Clone the repository
 
-### Multi-item Market Basket Analysis
+```bash
+git clone https://github.com/SiteshAnand/AI-Agent-Sales-and-Customer-Analytics.git
+```
 
-Market Basket Analysis supports bounded Apriori itemsets of 2–4 products. You can specify “3-item combinations” or “4-item rules” in a request. Defaults search up to 3 items. The search has a candidate safety limit; increase minimum support or reduce itemset size if the data has very high product cardinality.
+### 2. Navigate to the project directory
 
-### Long and multi-part questions
+```bash
+cd AI-Agent-Sales-and-Customer-Analytics
+```
 
-The default maximum question length is 10,000 characters. Clear task boundaries include semicolons, new lines, “then also”, “and also”, and “and” followed by a new action (such as “and identify…”). The agent processes tasks sequentially and reports partial failures instead of concealing them.
+### 3. Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+Activate it:
+
+**Windows:**
+```bash
+.venv\Scripts\activate
+```
+
+**Mac/Linux:**
+```bash
+source .venv/bin/activate
+```
+
+### 4. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```env
+GEMINI_API_KEY=your_actual_api_key
+GEMINI_MODEL=gemini-3.5-flash-lite
+```
+
+Never commit your actual API key or `.env` file to GitHub.
+
+### 6. Run the application
+
+```bash
+streamlit run app.py
+```
+
+The application will open in your browser.
+
+## 🧪 Testing & Reliability
+
+The upgraded application includes automated tests covering analytical modules, query handling, data understanding, forecasting, customer analytics, regression, RFM and result validation.
+
+**Latest recorded test result:**
+
+- 136 automated tests passed.
+- Heavy-dataset testing completed successfully.
+- Separate testing and production deployments operational.
+
+Testing was performed using Pytest.
+
+```bash
+python -m pytest -v
+```
+
+## ☁️ Deployment & Version Control
+
+The project uses separate Git branches and Streamlit deployments:
+
+| Branch | Purpose |
+|---|---|
+| `master` | Production application |
+| `upgrade-testing` | Upgrade testing and validation |
+
+This approach allows new functionality to be tested independently before production updates.
+
+## 💼 Business Value
+
+The application demonstrates how AI and analytics can be applied to practical business problems.
+
+Its capabilities are relevant to:
+
+- Revenue Operations.
+- Sales Performance Management.
+- Customer Success Operations.
+- Customer Analytics.
+- Business Intelligence.
+- Predictive Business Analytics.
+
+It brings together business understanding, analytical methods and AI-powered interaction in one application.
+
+## 🔮 Future Development
+
+Potential areas for further development include:
+
+- Additional CRM and business-system integrations.
+- Advanced customer lifetime value analytics.
+- Deeper revenue and pipeline analytics.
+- More sophisticated forecasting and predictive models.
+- Enhanced analytical automation.
+- Expanded business performance reporting.
+
+## 👨‍💻 Author
+
+**Sitesh Anand**
+
+Business Analytics | Revenue Operations | Customer Analytics | AI-Powered Business Analysis
+
+This project reflects the application of business domain knowledge, analytical thinking and AI engineering to solve practical business problems.
+
+**GitHub:** [SiteshAnand](https://github.com/SiteshAnand)
+
+---
+
+*Built to connect business intelligence, customer analytics and artificial intelligence.*
